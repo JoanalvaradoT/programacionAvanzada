@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Canvas</title>
     <style type="text/css">
-        body {
-            background-color: gray;
-        }
-
-        canvas {
-            background-color: rgb(252, 193, 0);
-        }
+      body {
+        background-color: gray;
+      }
+      canvas {
+        background-color: white;
+      }
     </style>
-</head>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="800" height="700"></canvas>
 
-<body>
-    <canvas id="myCanvas" width="600" height="600"></canvas>
     <script type="text/javascript">
-        const canvas = document.getElementById("myCanvas");
-        const ctx = canvas.getContext("2d");
+      const myCanvas = document.getElementById("myCanvas");
+      const ctx = myCanvas.getContext("2d");
 
-        function getRandomColor() {
+      const shapes = []; 
+      let currentColor = getRandomColor(); 
+      let isCircle = true; 
+
+      
+      function getRandomColor() {
             const letters = '0123456789ABCDEF';
             let color = '#';
             for (let i = 0; i < 6; i++) {
@@ -31,24 +34,44 @@
             return color;
         }
 
+      
+      myCanvas.addEventListener("mousedown", function (event) {
+        const rect = myCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const size = 100;
+
         
-        canvas.addEventListener("mouseover"  ,function (e) {
-            
-            const randomColor = getRandomColor();
-            ctx.fillStyle = randomColor;
-            ctx.strokeStyle = randomColor;
+        shapes.push({ x, y, size, color: currentColor, isCircle });
 
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        
+        drawShapes();
+      });
 
-            ctx.beginPath();
-            ctx.arc(x, y, 50, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
+      
+      myCanvas.addEventListener("mouseout", function () {
+        currentColor = getRandomColor(); 
+        isCircle = !isCircle; 
+      });
 
+      
+      function drawShapes() {
+        
+        ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+
+        
+        shapes.forEach(shape => {
+          ctx.beginPath();
+          if (shape.isCircle) {
+            ctx.arc(shape.x, shape.y, shape.size / 2, 0, 2 * Math.PI);
+          } else {
+            ctx.rect(shape.x - shape.size / 2, shape.y - shape.size / 2, shape.size, shape.size);
+          }
+          ctx.fillStyle = shape.color;
+          ctx.fill();
+          ctx.stroke();
         });
+      }
     </script>
-</body>
-
+  </body>
 </html>
