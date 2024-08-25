@@ -20,6 +20,7 @@
         const puntos = [];
         let colorActual = obtenerColorAleatorio(); 
         let esCirculo = true; 
+        let botonPresionado = false; // Variable para rastrear el estado del botón
 
         function obtenerColorAleatorio() {
             const letras = '0123456789ABCDEF';
@@ -38,19 +39,27 @@
 
             formas.push({ x, y, tamaño, color: colorActual, esCirculo });
             dibujarCanvas();
+            
+            botonPresionado = true; // Marcar el botón como presionado
+        });
+
+        miCanvas.addEventListener("mouseup", function () {
+            botonPresionado = false; // Marcar el botón como no presionado
         });
 
         miCanvas.addEventListener("mouseout", function () {
             colorActual = obtenerColorAleatorio(); 
             esCirculo = !esCirculo; 
+            botonPresionado = false; // Marcar el botón como no presionado al salir del canvas
         });
 
         miCanvas.addEventListener('mousemove', (evento) => {
+            if (!botonPresionado) return; // Solo registrar puntos si el botón está presionado
+            
             const rect = miCanvas.getBoundingClientRect();
             const x = evento.clientX - rect.left;
             const y = evento.clientY - rect.top;
 
-            
             if (x >= 0 && x <= miCanvas.width && y >= 0 && y <= miCanvas.height) {
                 puntos.push({ x, y });
                 dibujarCanvas();
@@ -58,10 +67,8 @@
         });
 
         function dibujarCanvas() {
-           
             ctx.clearRect(0, 0, miCanvas.width, miCanvas.height);
 
-           
             formas.forEach(forma => {
                 ctx.beginPath();
                 if (forma.esCirculo) {
@@ -74,7 +81,6 @@
                 ctx.stroke();
             });
 
-            
             ctx.fillStyle = 'gray'; 
             const radio = 2; 
             puntos.forEach(punto => {
