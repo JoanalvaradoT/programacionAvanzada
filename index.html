@@ -1,77 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canvas</title>
-    <style type="text/css">
-      body {
-        background-color: gray;
-      }
-      canvas {
-        background-color: white;
-      }
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dibujo en Canvas</title>
+    <style>
+        #myCanvas {
+            border: 1px solid #000000;
+        }
     </style>
-  </head>
-  <body>
-    <canvas id="myCanvas" width="800" height="700"></canvas>
-
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="600"></canvas>
     <script type="text/javascript">
-      const myCanvas = document.getElementById("myCanvas");
-      const ctx = myCanvas.getContext("2d");
+        const miCanvas = document.getElementById("myCanvas");
+        const ctx = miCanvas.getContext("2d");
 
-      const shapes = []; 
-      let currentColor = getRandomColor(); 
-      let isCircle = true; 
+        const formas = []; 
+        const puntos = [];
+        let colorActual = obtenerColorAleatorio(); 
+        let esCirculo = true; 
 
-      
-      function getRandomColor() {
-            const letters = '0123456789ABCDEF';
+        function obtenerColorAleatorio() {
+            const letras = '0123456789ABCDEF';
             let color = '#';
             for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
+                color += letras[Math.floor(Math.random() * 16)];
             }
             return color;
         }
 
-      
-      myCanvas.addEventListener("mousedown", function (event) {
-        const rect = myCanvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const size = 100;
+        miCanvas.addEventListener("mousedown", function (evento) {
+            const rect = miCanvas.getBoundingClientRect();
+            const x = evento.clientX - rect.left;
+            const y = evento.clientY - rect.top;
+            const tamaño = 80;
 
-        
-        shapes.push({ x, y, size, color: currentColor, isCircle });
-
-        
-        drawShapes();
-      });
-
-      
-      myCanvas.addEventListener("mouseout", function () {
-        currentColor = getRandomColor(); 
-        isCircle = !isCircle; 
-      });
-
-      
-      function drawShapes() {
-        
-        ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
-
-        
-        shapes.forEach(shape => {
-          ctx.beginPath();
-          if (shape.isCircle) {
-            ctx.arc(shape.x, shape.y, shape.size / 2, 0, 2 * Math.PI);
-          } else {
-            ctx.rect(shape.x - shape.size / 2, shape.y - shape.size / 2, shape.size, shape.size);
-          }
-          ctx.fillStyle = shape.color;
-          ctx.fill();
-          ctx.stroke();
+            formas.push({ x, y, tamaño, color: colorActual, esCirculo });
+            dibujarCanvas();
         });
-      }
+
+        miCanvas.addEventListener("mouseout", function () {
+            colorActual = obtenerColorAleatorio(); 
+            esCirculo = !esCirculo; 
+        });
+
+        miCanvas.addEventListener('mousemove', (evento) => {
+            const rect = miCanvas.getBoundingClientRect();
+            const x = evento.clientX - rect.left;
+            const y = evento.clientY - rect.top;
+
+            
+            if (x >= 0 && x <= miCanvas.width && y >= 0 && y <= miCanvas.height) {
+                puntos.push({ x, y });
+                dibujarCanvas();
+            }
+        });
+
+        function dibujarCanvas() {
+           
+            ctx.clearRect(0, 0, miCanvas.width, miCanvas.height);
+
+           
+            formas.forEach(forma => {
+                ctx.beginPath();
+                if (forma.esCirculo) {
+                    ctx.arc(forma.x, forma.y, forma.tamaño / 2, 0, 2 * Math.PI);
+                } else {
+                    ctx.rect(forma.x - forma.tamaño / 2, forma.y - forma.tamaño / 2, forma.tamaño, forma.tamaño);
+                }
+                ctx.fillStyle = forma.color;
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            
+            ctx.fillStyle = 'gray'; 
+            const radio = 2; 
+            puntos.forEach(punto => {
+                ctx.beginPath();
+                ctx.arc(punto.x, punto.y, radio, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
