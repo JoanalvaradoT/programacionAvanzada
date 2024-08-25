@@ -40,21 +40,21 @@
             formas.push({ x, y, tamaño, color: colorActual, esCirculo });
             dibujarCanvas();
             
-            botonPresionado = true; // Marcar el botón como presionado
+            botonPresionado = true; 
         });
 
         miCanvas.addEventListener("mouseup", function () {
-            botonPresionado = false; // Marcar el botón como no presionado
+            botonPresionado = false; 
         });
 
         miCanvas.addEventListener("mouseout", function () {
             colorActual = obtenerColorAleatorio(); 
             esCirculo = !esCirculo; 
-            botonPresionado = false; // Marcar el botón como no presionado al salir del canvas
+            botonPresionado = false; 
         });
 
         miCanvas.addEventListener('mousemove', (evento) => {
-            if (!botonPresionado) return; // Solo registrar puntos si el botón está presionado
+            if (!botonPresionado) return; 
             
             const rect = miCanvas.getBoundingClientRect();
             const x = evento.clientX - rect.left;
