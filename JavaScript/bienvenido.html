@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bienvenido</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Bienvenido</h1>
+        <p>Has iniciado sesión con éxito, {{ usuario }}.</p>
+
+        <div v-if="usuarios.length > 0">
+            <h2>Información de Usuarios</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Compañía</th>
+                        <th>Frase</th>
+                        <th>Sector</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="usuario in usuarios" :key="usuario.id">
+                        <td>{{ usuario.id }}</td>
+                        <td>{{ usuario.name }}</td>
+                        <td>{{ usuario.username }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td>{{ usuario.phone }}</td>
+                        <td>{{ usuario.address.street }}, {{ usuario.address.city }}, {{ usuario.address.zipcode }}</td>
+                        <td>{{ usuario.company.name }}</td>
+                        <td>{{ usuario.company.catchPhrase }}</td>
+                        <td>{{ usuario.company.bs }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    usuario: sessionStorage.getItem('usuario') || '',
+                    usuarios: []
+                };
+            },
+            mounted() {
+
+                const usuariosGuardados = sessionStorage.getItem('usuarios');
+                if (usuariosGuardados) {
+                    this.usuarios = JSON.parse(usuariosGuardados);
+                } else {
+                    this.cargarUsuarios();
+                }
+            },
+            methods: {
+                async cargarUsuarios() {
+                    const response = await fetch('users.json');
+                    const data = await response.json();
+                    this.usuarios = data;
+
+                    sessionStorage.setItem('usuarios', JSON.stringify(data));
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
