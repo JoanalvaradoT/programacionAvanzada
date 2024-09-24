@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bienvenido</title>
+    <title>Bienvenido</title>
     <style>
         table {
             width: 100%;
@@ -53,6 +53,8 @@
         <h1>Bienvenido</h1>
         <p>Has iniciado sesión con éxito, {{ usuario }}.</p>
 
+        <button @click="mostrarFormularioNuevoUsuario">Agregar Nuevo Usuario</button>
+
         <div v-if="usuarios.length > 0">
             <h2>Información de Usuarios</h2>
             <table>
@@ -90,41 +92,41 @@
             </table>
         </div>
 
-        
-        <div v-if="usuarioEditable !== null" class="edit-form">
-            <h2>Editar Usuario</h2>
+        <div v-if="usuarioEditable !== null || nuevoUsuario" class="edit-form">
+            <h2 v-if="usuarioEditable">Editar Usuario</h2>
+            <h2 v-else>Agregar Nuevo Usuario</h2>
             <form @submit.prevent="guardarCambios">
                 <label for="nombre">Nombre:</label>
-                <input type="text" v-model="usuarioEditable.name" id="nombre" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.name : nuevoUsuarioData.name" id="nombre" required>
 
                 <label for="username">Username:</label>
-                <input type="text" v-model="usuarioEditable.username" id="username" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.username : nuevoUsuarioData.username" id="username" required>
 
                 <label for="email">Email:</label>
-                <input type="email" v-model="usuarioEditable.email" id="email" required>
+                <input type="email" v-model="usuarioEditable ? usuarioEditable.email : nuevoUsuarioData.email" id="email" required>
 
                 <label for="phone">Teléfono:</label>
-                <input type="text" v-model="usuarioEditable.phone" id="phone" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.phone : nuevoUsuarioData.phone" id="phone" required>
 
                 <label for="calle">Calle:</label>
-                <input type="text" v-model="usuarioEditable.address.street" id="calle" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.address.street : nuevoUsuarioData.address.street" id="calle" required>
 
                 <label for="ciudad">Ciudad:</label>
-                <input type="text" v-model="usuarioEditable.address.city" id="ciudad" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.address.city : nuevoUsuarioData.address.city" id="ciudad" required>
 
                 <label for="codigoPostal">Código Postal:</label>
-                <input type="text" v-model="usuarioEditable.address.zipcode" id="codigoPostal" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.address.zipcode : nuevoUsuarioData.address.zipcode" id="codigoPostal" required>
 
                 <label for="compania">Compañía:</label>
-                <input type="text" v-model="usuarioEditable.company.name" id="compania" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.company.name : nuevoUsuarioData.company.name" id="compania" required>
 
                 <label for="frase">Frase:</label>
-                <input type="text" v-model="usuarioEditable.company.catchPhrase" id="frase" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.company.catchPhrase : nuevoUsuarioData.company.catchPhrase" id="frase" required>
 
                 <label for="sector">Sector:</label>
-                <input type="text" v-model="usuarioEditable.company.bs" id="sector" required>
+                <input type="text" v-model="usuarioEditable ? usuarioEditable.company.bs : nuevoUsuarioData.company.bs" id="sector" required>
 
-                <button type="submit">Guardar Cambios</button>
+                <button type="submit">{{ usuarioEditable ? 'Guardar Cambios' : 'Agregar Usuario' }}</button>
                 <button type="button" @click="cancelarEdicion">Cancelar</button>
             </form>
         </div>
@@ -139,7 +141,25 @@
                 return {
                     usuario: sessionStorage.getItem('usuario') || '',
                     usuarios: [],
-                    usuarioEditable: null 
+                    usuarioEditable: null,
+                    nuevoUsuario: false,
+                    nuevoUsuarioData: {
+                        id: '',
+                        name: '',
+                        username: '',
+                        email: '',
+                        phone: '',
+                        address: {
+                            street: '',
+                            city: '',
+                            zipcode: ''
+                        },
+                        company: {
+                            name: '',
+                            catchPhrase: '',
+                            bs: ''
+                        }
+                    }
                 };
             },
             mounted() {
@@ -166,13 +186,43 @@
                     this.usuarioEditable.index = index; 
                 },
                 guardarCambios() {
-                    this.usuarios[this.usuarioEditable.index] = { ...this.usuarioEditable };
+                    if (this.usuarioEditable) {
+                        this.usuarios[this.usuarioEditable.index] = { ...this.usuarioEditable };
+                    } else {
+                        this.nuevoUsuarioData.id = this.usuarios.length + 1;
+                        this.usuarios.push({ ...this.nuevoUsuarioData });
+                    }
                     sessionStorage.setItem('usuarios', JSON.stringify(this.usuarios));
-
                     this.usuarioEditable = null;
+                    this.nuevoUsuario = false;
+                    this.resetNuevoUsuarioData();
                 },
                 cancelarEdicion() {
                     this.usuarioEditable = null;
+                    this.nuevoUsuario = false;
+                    this.resetNuevoUsuarioData();
+                },
+                mostrarFormularioNuevoUsuario() {
+                    this.nuevoUsuario = true;
+                },
+                resetNuevoUsuarioData() {
+                    this.nuevoUsuarioData = {
+                        id: '',
+                        name: '',
+                        username: '',
+                        email: '',
+                        phone: '',
+                        address: {
+                            street: '',
+                            city: '',
+                            zipcode: ''
+                        },
+                        company: {
+                            name: '',
+                            catchPhrase: '',
+                            bs: ''
+                        }
+                    };
                 }
             }
         }).mount('#app');
