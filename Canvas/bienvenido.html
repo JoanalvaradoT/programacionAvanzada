@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bienvenido</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+
+        .edit-form {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .edit-form label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        .edit-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Bienvenido</h1>
+        <p>Has iniciado sesión con éxito, {{ usuario }}.</p>
+
+        <div v-if="usuarios.length > 0">
+            <h2>Información de Usuarios</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Compañía</th>
+                        <th>Frase</th>
+                        <th>Sector</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(usuario, index) in usuarios" :key="usuario.id">
+                        <td>{{ usuario.id }}</td>
+                        <td>{{ usuario.name }}</td>
+                        <td>{{ usuario.username }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td>{{ usuario.phone }}</td>
+                        <td>{{ usuario.address.street }}, {{ usuario.address.city }}, {{ usuario.address.zipcode }}</td>
+                        <td>{{ usuario.company.name }}</td>
+                        <td>{{ usuario.company.catchPhrase }}</td>
+                        <td>{{ usuario.company.bs }}</td>
+                        <td>
+                            <button @click="editarUsuario(index)">Editar</button>
+                            <button @click="eliminarUsuario(index)">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        
+        <div v-if="usuarioEditable !== null" class="edit-form">
+            <h2>Editar Usuario</h2>
+            <form @submit.prevent="guardarCambios">
+                <label for="nombre">Nombre:</label>
+                <input type="text" v-model="usuarioEditable.name" id="nombre" required>
+
+                <label for="username">Username:</label>
+                <input type="text" v-model="usuarioEditable.username" id="username" required>
+
+                <label for="email">Email:</label>
+                <input type="email" v-model="usuarioEditable.email" id="email" required>
+
+                <label for="phone">Teléfono:</label>
+                <input type="text" v-model="usuarioEditable.phone" id="phone" required>
+
+                <label for="calle">Calle:</label>
+                <input type="text" v-model="usuarioEditable.address.street" id="calle" required>
+
+                <label for="ciudad">Ciudad:</label>
+                <input type="text" v-model="usuarioEditable.address.city" id="ciudad" required>
+
+                <label for="codigoPostal">Código Postal:</label>
+                <input type="text" v-model="usuarioEditable.address.zipcode" id="codigoPostal" required>
+
+                <label for="compania">Compañía:</label>
+                <input type="text" v-model="usuarioEditable.company.name" id="compania" required>
+
+                <label for="frase">Frase:</label>
+                <input type="text" v-model="usuarioEditable.company.catchPhrase" id="frase" required>
+
+                <label for="sector">Sector:</label>
+                <input type="text" v-model="usuarioEditable.company.bs" id="sector" required>
+
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" @click="cancelarEdicion">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    usuario: sessionStorage.getItem('usuario') || '',
+                    usuarios: [],
+                    usuarioEditable: null 
+                };
+            },
+            mounted() {
+                const usuariosGuardados = sessionStorage.getItem('usuarios');
+                if (usuariosGuardados) {
+                    this.usuarios = JSON.parse(usuariosGuardados);
+                } else {
+                    this.cargarUsuarios();
+                }
+            },
+            methods: {
+                async cargarUsuarios() {
+                    const response = await fetch('users.json');
+                    const data = await response.json();
+                    this.usuarios = data;
+                    sessionStorage.setItem('usuarios', JSON.stringify(data));
+                },
+                eliminarUsuario(index) {
+                    this.usuarios.splice(index, 1);
+                    sessionStorage.setItem('usuarios', JSON.stringify(this.usuarios));
+                },
+                editarUsuario(index) {
+                    this.usuarioEditable = { ...this.usuarios[index], address: { ...this.usuarios[index].address }, company: { ...this.usuarios[index].company } };
+                    this.usuarioEditable.index = index; 
+                },
+                guardarCambios() {
+                    this.usuarios[this.usuarioEditable.index] = { ...this.usuarioEditable };
+                    sessionStorage.setItem('usuarios', JSON.stringify(this.usuarios));
+
+                    this.usuarioEditable = null;
+                },
+                cancelarEdicion() {
+                    this.usuarioEditable = null;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
